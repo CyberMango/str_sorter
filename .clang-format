@@ -1,0 +1,8 @@
+BasedOnStyle: WebKit
+
+BreakConstructorInitializers: AfterColon
+SpaceBeforeCtorInitializerColon: false
+PackConstructorInitializers: Never
+IndentWidth: 4
+
+ColumnLimit: 80
