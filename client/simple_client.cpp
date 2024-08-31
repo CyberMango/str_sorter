@@ -1,12 +1,15 @@
 #include "simple_client.hpp"
-#include "../server/requests_handler.hpp"
-#include "..ipc/ipc.hpp"
+
 #include <unistd.h>
+
+#include "../ipc/ipc.hpp"
+#include "../ipc/ipc_socket.hpp"
+#include "../server/requests_handler.hpp"
 
 int32_t simple_client::send(std::string const& data)
 {
     uint32_t uid = static_cast<uint32_t>(getuid());
-    IPC::message to_send { .uid = uid,
+    IPC_socket::message to_send { .uid = uid, // TODOO not the type anymore
         .type = static_cast<uint16_t>(IPC::request_type::SEND),
         .data = data };
 

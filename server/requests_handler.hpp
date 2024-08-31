@@ -1,11 +1,12 @@
 #ifndef _REQUESTS_HANDLER_HPP_
 #define _REQUESTS_HANDLER_HPP_
 
-#include "../ipc/ipc.hpp"
 #include <cerrno>
 #include <cstdint>
 #include <iostream>
 #include <string>
+
+#include "../ipc/ipc.hpp"
 
 class requests_handler {
 public:
@@ -19,7 +20,7 @@ public:
     int32_t run();
 
 private:
-    IPC m_server;
+    IPC_server m_server;
 
     int32_t wait_for_request(
         uint32_t& uid, request_type& type, std::string& data);

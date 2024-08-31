@@ -1,6 +1,7 @@
 /*** Includes ***/
 #include "client/simple_client.hpp"
 #include "server/requests_handler.hpp"
+#include "utility/simple_logger.hpp"
 
 #include <unistd.h>
 
