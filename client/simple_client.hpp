@@ -11,6 +11,7 @@
 class simple_client {
 public:
     simple_client() = default;
+    int32_t connect();
     int32_t send(std::string_view const& data);
     int32_t recv(uint32_t length, std::string& recevied_data);
 

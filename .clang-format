@@ -20,3 +20,5 @@ BinPackArguments: false
 
 # Encourages breaking before the first parameter if the line is too long
 PenaltyBreakBeforeFirstCallParameter: 1
+
+AllowShortFunctionsOnASingleLine: None

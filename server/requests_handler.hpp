@@ -4,18 +4,19 @@
 #include <cerrno>
 #include <cstdint>
 #include <iostream>
+#include <memory>
 #include <string>
 
 #include "../ipc/ipc_server.hpp"
 
 class requests_handler {
 public:
-    requests_handler(
-        std::unique_ptr<IPC_server> server) { m_server = std::move(server) }
+    requests_handler() = default;
 
-    int32_t initialize()
+    int32_t initialize(std::unique_ptr<IPC_server> server)
     {
-        return m_server.start_server();
+        m_server = std::move(server);
+        return m_server->start_server();
     }
 
     int32_t run();
@@ -23,11 +24,10 @@ public:
 private:
     std::unique_ptr<IPC_server> m_server;
 
-    int32_t wait_for_request(
-        uint32_t& uid, request_type& type, std::string& data);
-    uint32_t send_data_to_client(uint32_t uid, std::string data);
     int32_t store_data(uint32_t uid, std::string data);
     int32_t fetch_data(uint32_t uid, uint32_t data_len, std::string& data);
+
+    int32_t handle_request(IPC_server::message in_msg);
 };
 
 #endif // _REQUESTS_HANDLER_HPP_

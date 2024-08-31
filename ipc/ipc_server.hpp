@@ -5,7 +5,7 @@
 
 /*** Constants ***/
 #define SERVER_IP "127.0.0.1"
-#define SERVER_PORT (1242)
+#define SERVER_PORT (1244)
 #define MAX_CONNECTIONS (10)
 
 /*** Classes ***/

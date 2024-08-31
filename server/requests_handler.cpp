@@ -1,14 +1,15 @@
 #include "requests_handler.hpp"
-#include "../ipc/ipc.hpp"
+
 #include <thread>
+
+#include "../ipc/ipc_server.hpp"
+#include "../utility/simple_logger.hpp"
 
 int32_t requests_handler::run()
 {
     int32_t status = 0;
-    uint32_t client_uid = 0;
-    request_type type = IPC::INVALID;
-    std::string request_data {};
-    std::string response_data {};
+    IPC_server::message in_msg = { 0 };
+    IPC_server::response out_resp = { 0 };
 
     // TODO find a nice stop condition.
     while (true) {
@@ -18,48 +19,63 @@ int32_t requests_handler::run()
         there would be security holes without a whole system that handles
         the security and not pretending problems.
         */
-        status = wait_for_request(client_uid, type, request_data);
+        status = m_server->wait_for_request(in_msg);
         if (0 != status) {
             return status;
         }
 
-        // TODOO move this whole handling to a new thread each time.
-        // TODO try to make it a switch-case again
-        // Client wants to send data.
-        if (request_type::SEND == type) {
-            status = store_data(client_uid, request_data);
-            if (0 != status) {
-                return status;
-            }
-            // Client wants to receive data.
-        } else if (request_type::RECEIVE == type) {
-            errno = 0;
-            char* end = nullptr;
-            uint32_t data_len = static_cast<uint32_t>(
-                std::strtoll(request_data.c_str(), &end, 10));
-            /* TODOO dont actually stop the server due to this error on
-            release. you need to print an error message and only stop on
-            unrecoverable errors. here and everywhere you are the one
-            generating the error.
-            */
-            if (0 != errno) {
-                // TODO return a better error code maybe.
-                return ERANGE;
-            }
-            status = fetch_data(client_uid, data_len, response_data);
-            if (0 != status) {
-                return status;
-            }
-
-            status = send_data_to_client(client_uid, response_data);
-            if (0 != status) {
-                return status;
-            }
-        } else {
-            // TODOO
-            return EINVAL;
-        }
+        debug_print("Creating request thread\n");
+        std::thread request_thread(
+            &requests_handler::handle_request, this, in_msg);
+        debug_print("Waiting on request thread\n");
+        request_thread.join();
     }
+}
+
+int32_t requests_handler::handle_request(IPC_server::message in_msg)
+{
+    int32_t status = 0;
+    IPC_server::response out_resp = { 0 };
+
+    if (IPC_server::request_type::SEND == in_msg.type) {
+        status = store_data(in_msg.uid, in_msg.data);
+        if (0 != status) {
+            return status;
+        }
+        // Client wants to receive data.
+    } else if (IPC_server::request_type::RECEIVE == in_msg.type) {
+        errno = 0;
+        char* end = nullptr;
+        uint32_t data_len = static_cast<uint32_t>(
+            std::strtoll(in_msg.data.c_str(), &end, 10));
+        /* TODOO dont actually stop the server due to this error on
+        release. you need to print an error message and only stop on
+        unrecoverable errors. here and everywhere you are the one
+        generating the error.
+        */
+        if (0 != errno) {
+            error_print(
+                "Invalid data receive request %s\n", in_msg.data.c_str());
+            // TODO return a better error code maybe.
+            return ERANGE;
+        }
+        status = fetch_data(in_msg.uid, data_len, out_resp.data);
+        if (0 != status) {
+            return status;
+        }
+        out_resp.id = in_msg.id;
+        out_resp.type = in_msg.type;
+
+        status = m_server->send_response(out_resp);
+        if (0 != status) {
+            return status;
+        }
+    } else {
+        // TODOO
+        return EINVAL;
+    }
+
+    return 0;
 }
 
 // TODO

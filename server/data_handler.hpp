@@ -3,8 +3,8 @@
 
 #include <map>
 #include <mutex>
-#include <pair>
 #include <string>
+#include <utility>
 #include <vector>
 
 class data_handler {
@@ -20,6 +20,6 @@ private:
         std::string data;
     };
     std::map<uint32_t, data_handler::client_data> m_clients_data;
-}
+};
 
 #endif // _DATA_HANDLER_HPP_
