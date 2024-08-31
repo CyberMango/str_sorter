@@ -6,21 +6,22 @@
 #include <iostream>
 #include <string>
 
-#include "../ipc/ipc.hpp"
+#include "../ipc/ipc_server.hpp"
 
 class requests_handler {
 public:
-    requests_handler():
-        m_server {}
-    {
-    }
+    requests_handler(
+        std::unique_ptr<IPC_server> server) { m_server = std::move(server) }
 
-    int32_t initialize() { return m_server.start_server(); }
+    int32_t initialize()
+    {
+        return m_server.start_server();
+    }
 
     int32_t run();
 
 private:
-    IPC_server m_server;
+    std::unique_ptr<IPC_server> m_server;
 
     int32_t wait_for_request(
         uint32_t& uid, request_type& type, std::string& data);

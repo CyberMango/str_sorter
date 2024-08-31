@@ -5,17 +5,17 @@
 #include <iostream>
 #include <string>
 
-#include "../ipc/ipc_server_socket.hpp"
-#include "../ipc/ipc_socket.hpp"
+#include "../ipc/ipc_client_socket.hpp"
+#include "../ipc/ipc_server.hpp"
 
 class simple_client {
 public:
     simple_client() = default;
-    int32_t send(std::string const& data);
+    int32_t send(std::string_view const& data);
     int32_t recv(uint32_t length, std::string& recevied_data);
 
 private:
-    IPC_socket_server ipc;
+    IPC_client_socket ipc;
 };
 
 #endif // _SIMPLE_CLIENT_HPP_
