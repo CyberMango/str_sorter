@@ -1,0 +1,100 @@
+{
+	"version": "2.0.0",
+	"tasks": [ //-DCMAKE_CXX_COMPILER=\"clang++\"
+		{
+			"type": "shell",
+			"label": "C/C++: clang++.exe build active file",
+			"command": "clang++",
+			"args": [
+				"-fcolor-diagnostics",
+				"-fansi-escape-codes",
+				"-g",
+				"${file}",
+				"-o",
+				"${fileDirname}/${fileBasenameNoExtension}"
+			],
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			},
+			"detail": "compiler: clang++"
+		},
+		{
+			"type": "process",
+			"label": "cmake debug build",
+			"command": "cmake",
+			"args": [
+				"--build",
+				"."
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/debug",
+				"shell": {
+					"executable": "bash"
+				}
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+		},
+		{
+			"type": "cppbuild",
+			"label": "cmake clean debug build",
+			"command": "cmake",
+			"args": [
+				"--build",
+				".",
+				"--target",
+				"clean"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/debug"
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			},
+		},
+		{
+			"type": "cppbuild",
+			"label": "cmake release build",
+			"command": "cmake",
+			"args": [
+				"--build",
+				"."
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/release"
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			},
+		},
+		{
+			"type": "cppbuild",
+			"label": "cmake clean release build",
+			"command": "cmake",
+			"args": [
+				"--build",
+				".",
+				"--target",
+				"clean"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/release"
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			},
+		}
+	]
+}
