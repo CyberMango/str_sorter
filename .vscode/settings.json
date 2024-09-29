@@ -60,6 +60,15 @@
         "typeinfo": "cpp",
         "cstring": "cpp",
         "map": "cpp",
-        "shared_mutex": "cpp"
+        "shared_mutex": "cpp",
+        "cinttypes": "cpp",
+        "forward_list": "cpp",
+        "list": "cpp",
+        "buffer": "cpp",
+        "executor": "cpp",
+        "io_context": "cpp",
+        "netfwd": "cpp",
+        "socket": "cpp"
     },
+    "C_Cpp.errorSquiggles": "enabled",
 }

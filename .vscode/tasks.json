@@ -50,12 +50,12 @@
 			"command": "cmake",
 			"args": [
 				"--build",
-				".",
+				"./debug",
 				"--target",
 				"clean"
 			],
 			"options": {
-				"cwd": "${workspaceFolder}/debug"
+				"cwd": "${workspaceFolder}"
 			},
 			"group": {
 				"kind": "build",

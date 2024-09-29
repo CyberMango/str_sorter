@@ -4,8 +4,8 @@
 #include <cstdint>
 #include <memory>
 
-#include "../ipc/ipc_server.hpp"
-#include "../ipc/ipc_server_socket.hpp"
+#include "../ipc/server.hpp"
+#include "../ipc/socket_server.hpp"
 #include "../utility/simple_logger.hpp"
 #include "data_handler.hpp"
 #include "requests_handler.hpp"

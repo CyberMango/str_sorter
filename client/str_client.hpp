@@ -3,20 +3,22 @@
 
 #include <cstdint>
 #include <iostream>
+#include <memory>
 #include <string>
 
-#include "../ipc/ipc_client_socket.hpp"
-#include "../ipc/ipc_server.hpp"
+#include "../ipc/server.hpp"
+#include "../ipc/socket_client.hpp"
 
-class simple_client {
+class str_client {
 public:
-    simple_client() = default;
-    int32_t connect();
+    str_client() = default;
+    int32_t connect(std::string address);
+    int32_t disconnect();
     int32_t send(std::string_view const& data);
     int32_t recv(uint32_t length, std::string& recevied_data);
 
 private:
-    IPC_client_socket ipc;
+    std::unique_ptr<IPC::client> ipc;
 };
 
 #endif // _SIMPLE_CLIENT_HPP_

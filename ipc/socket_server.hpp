@@ -1,5 +1,5 @@
-#ifndef _SOCKET_SERVER_HPP_
-#define _SOCKET_SERVER_HPP_
+#ifndef _IPC_SOCKET_SERVER_HPP_
+#define _IPC_SOCKET_SERVER_HPP_
 
 #include <algorithm>
 #include <cstdint>
@@ -25,12 +25,13 @@ public:
         m_socket { nullptr }
     {
     }
-    ~socket_server()
+    ~socket_server() override
     {
         // TODO close all sockets.
     }
     virtual int32_t start_server() override;
-    virtual int32_t wait_for_connection(IPC::client& connection) override;
+    virtual int32_t wait_for_connection(
+        std::unique_ptr<IPC::client>& connection) override;
 
 private:
     std::unique_ptr<IPC::socket_guard> m_socket;
@@ -43,4 +44,4 @@ private:
 
 } // namepsace IPC
 
-#endif // _SOCKET_SERVER_HPP_
+#endif // _IPC_SOCKET_SERVER_HPP_

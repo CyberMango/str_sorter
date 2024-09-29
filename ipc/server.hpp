@@ -1,7 +1,8 @@
-#ifndef _SERVER_HPP_
-#define _SERVER_HPP_
+#ifndef _IPC_SERVER_HPP_
+#define _IPC_SERVER_HPP_
 
 /*** Includes ***/
+#include <memory>
 #include <string>
 
 #include "client.hpp"
@@ -17,10 +18,15 @@ namespace IPC {
 /*** Definitions ***/
 class server {
 public:
+    virtual ~server()
+    {
+    }
     virtual int32_t start_server() = 0;
-    virtual int32_t wait_for_connection(IPC::client& connection) = 0;
+    virtual int32_t wait_for_connection(
+        std::unique_ptr<IPC::client>& connection)
+        = 0;
 };
 
 } // namepsace IPC
 
-#endif // _SERVER_HPP_
+#endif // _IPC_SERVER_HPP_

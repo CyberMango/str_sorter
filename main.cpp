@@ -3,7 +3,7 @@
 #include <unistd.h>
 
 #include "client/simple_client.hpp"
-#include "ipc/ipc_server_socket.hpp"
+#include "ipc/socket_server.hpp"
 // #include "server/requests_handler.hpp"
 #include "server/sort_server.hpp"
 #include "utility/simple_logger.hpp"
@@ -15,20 +15,20 @@ using namespace std;
 void test_server()
 {
     // IPC_server_socket server {};
-    // IPC_server::message msg = { 0 };
-    // IPC_server::response resp = { 0 };
+    // IPC::server::message msg = { 0 };
+    // IPC::server::response resp = { 0 };
     // server.start_server();
     // char* end = nullptr;
 
     // while (true) {
     //     auto req = server.wait_for_request(msg);
     //     cout << "data received from client: " << msg.data << endl;
-    //     if (msg.type == IPC_server::request_type::RECEIVE) {
+    //     if (msg.type == IPC::server::request_type::RECEIVE) {
     //         auto len = static_cast<uint32_t>(
     //             std::strtoll(msg.data.c_str(), &end, 10));
     //         resp.data = string(len, 'a');
     //         resp.id = msg.id;
-    //         resp.type = IPC_server::request_type::RECEIVE;
+    //         resp.type = IPC::server::request_type::RECEIVE;
     //         server.send_response(resp);
     //     }
     // }
@@ -40,7 +40,7 @@ void test_server()
 void test_client()
 {
     string data {};
-    simple_client client {};
+    str_client client {};
     cout << "client sending1" << endl;
     client.send(string_view { "aaaaabbbbb" });
     cout << "client sending2" << endl;
@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
 // int main(int argc, char* argv[])
 // {
 //     requests_handler server {};
-//     simple_client client {};
+//     str_client client {};
 
 //     server.initialize();
 

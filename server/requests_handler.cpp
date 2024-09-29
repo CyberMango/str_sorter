@@ -2,14 +2,14 @@
 
 #include <thread>
 
-#include "../ipc/ipc_server.hpp"
+#include "../ipc/server.hpp"
 #include "../utility/simple_logger.hpp"
 
 int32_t requests_handler::run()
 {
     int32_t status = 0;
-    IPC_server::message in_msg = { 0 };
-    IPC_server::response out_resp = { 0 };
+    IPC::server::request in_msg = { 0 };
+    IPC::server::response out_resp = { 0 };
 
     // TODO find a nice stop condition.
     while (true) {
@@ -19,7 +19,7 @@ int32_t requests_handler::run()
         there would be security holes without a whole system that handles
         the security and not pretending problems.
         */
-        status = m_server->wait_for_request(in_msg);
+        status = m_server->wait_for_connection(in_msg);
         if (0 != status) {
             return status;
         }
@@ -32,18 +32,18 @@ int32_t requests_handler::run()
     }
 }
 
-int32_t requests_handler::handle_request(IPC_server::message in_msg)
+int32_t requests_handler::handle_request(IPC::server::request in_msg)
 {
     int32_t status = 0;
-    IPC_server::response out_resp = { 0 };
+    IPC::server::response out_resp = { 0 };
 
-    if (IPC_server::request_type::SEND == in_msg.type) {
+    if (IPC::server::request_type::SEND == in_msg.type) {
         status = store_data(in_msg.uid, in_msg.data);
         if (0 != status) {
             return status;
         }
         // Client wants to receive data.
-    } else if (IPC_server::request_type::RECEIVE == in_msg.type) {
+    } else if (IPC::server::request_type::RECEIVE == in_msg.type) {
         errno = 0;
         char* end = nullptr;
         uint32_t data_len = static_cast<uint32_t>(

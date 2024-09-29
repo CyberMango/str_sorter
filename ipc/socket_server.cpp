@@ -57,7 +57,8 @@ int32_t IPC::socket_server::start_server()
     return 0;
 }
 
-int32_t IPC::socket_server::wait_for_connection(IPC::client& connection)
+int32_t IPC::socket_server::wait_for_connection(
+    std::unique_ptr<IPC::client>& connection)
 {
     int connection_fd = 0;
     struct sockaddr_in address = { 0 };
@@ -71,7 +72,7 @@ int32_t IPC::socket_server::wait_for_connection(IPC::client& connection)
         error_print("accept failed\n");
         return EIO;
     }
-    connection = IPC::socket_client(connection_fd);
+    connection = std::make_unique<IPC::socket_client>(connection_fd);
     debug_print("connection accepted on socket %d\n", connection_fd);
 
     return 0;
