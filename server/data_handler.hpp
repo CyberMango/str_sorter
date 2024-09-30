@@ -1,8 +1,10 @@
 #ifndef _DATA_HANDLER_HPP_
 #define _DATA_HANDLER_HPP_
 
+#include <cstdint>
 #include <map>
 #include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <utility>
 #include <vector>
@@ -16,9 +18,19 @@ public:
 
 private:
     class client_data {
-        std::mutex mtx;
+    public:
+        void store_data(std::string data);
+        std::string fetch_data(std::size_t length);
+
+    private:
+        std::mutex data_lock;
         std::string data;
     };
+
+    bool is_uid_stored(uint32_t uid);
+    void add_uid(uint32_t);
+
+    std::shared_mutex m_clients_data_lock;
     std::map<uint32_t, data_handler::client_data> m_clients_data;
 };
 
