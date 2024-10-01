@@ -15,7 +15,7 @@ public:
     int32_t connect(std::string address);
     int32_t disconnect();
     int32_t send(std::string_view const& data);
-    int32_t recv(uint32_t length, std::string& recevied_data);
+    int32_t recv(std::size_t length, std::string& recevied_data);
 
 private:
     std::unique_ptr<IPC::client> ipc;

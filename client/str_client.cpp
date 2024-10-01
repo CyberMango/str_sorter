@@ -36,7 +36,7 @@ int32_t str_client::send(std::string_view const& data)
     return 0;
 }
 
-int32_t str_client::recv(uint32_t length, std::string& recevied_data)
+int32_t str_client::recv(std::size_t length, std::string& recevied_data)
 {
     int32_t status = 0;
     uint32_t uid = static_cast<uint32_t>(getuid());

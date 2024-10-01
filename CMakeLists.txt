@@ -14,9 +14,10 @@ target_include_directories(ipc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ipc)
 add_executable(ipc_test ipc/test.cpp)
 target_link_libraries(ipc_test ipc)
 
-# add_library(server STATIC server/requests_handler.cpp server/requests_handler.hpp server/sort_server.hpp)
-# target_include_directories(server PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/server)
-# target_link_libraries(server ipc)
+file(GLOB server_headers "server/*.hpp")
+add_library(server STATIC server/data_handler.cpp ${server_headers})
+target_include_directories(server PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/server)
+target_link_libraries(server ipc)
 
 add_library(client STATIC client/str_client.cpp client/str_client.hpp)
 target_include_directories(client PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/client)
