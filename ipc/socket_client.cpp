@@ -98,17 +98,29 @@ int32_t IPC::socket_client::recv_message(IPC::message& message)
     int unix_status = 0;
     int32_t status = 0;
     auto& msg_data = message.data;
-    char data_buf[2048] = { 0 };
+    uint8_t data_buf[2048] = { 0 };
     std::size_t data_read = 0;
     ssize_t bytes_received = 0;
     IPC::message_metadata msg_metadata {};
 
+    // TODO move this into a "receive_metadata" func.
     errno = 0;
     bytes_received = recv(m_socket->m_fd, data_buf, sizeof(data_buf), 0);
     if (bytes_received < 0) {
         status = static_cast<int32_t>(errno);
-        error_print("recv failed.  errno=%d\n", errno);
+        error_print("recv failed. errno=%d\n", errno);
         return status;
+    }
+    if (0 == bytes_received) {
+        message.type = message_type::DISCONNECT;
+        return 0;
+    }
+    if (bytes_received < sizeof(msg_metadata)) {
+        error_print("received less bytes than possible. Got %ld, expected at "
+                    "least %lu\n",
+            bytes_received,
+            sizeof(msg_metadata));
+        return EIO;
     }
     memmove(&msg_metadata, data_buf, sizeof(msg_metadata));
     msg_data.insert(msg_data.begin(),
@@ -116,6 +128,7 @@ int32_t IPC::socket_client::recv_message(IPC::message& message)
         data_buf + bytes_received);
     data_read += bytes_received - sizeof(msg_metadata);
 
+    // TODO move this into a "read all data" func.
     while (data_read < msg_metadata.data_len) {
         errno = 0;
         bytes_received = recv(m_socket->m_fd,
@@ -126,6 +139,10 @@ int32_t IPC::socket_client::recv_message(IPC::message& message)
             status = static_cast<int32_t>(errno);
             error_print("recv failed. errno=%d\n", errno);
             return status;
+        }
+        if (0 == bytes_received) {
+            message.type = message_type::DISCONNECT;
+            return EIO;
         }
 
         msg_data.insert(msg_data.end(), data_buf, data_buf + bytes_received);
