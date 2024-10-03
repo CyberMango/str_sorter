@@ -1,5 +1,6 @@
 #include "str_client.hpp"
 
+#include <array>
 #include <string>
 #include <unistd.h>
 
@@ -40,11 +41,14 @@ int32_t str_client::recv(std::size_t length, std::string& recevied_data)
 {
     int32_t status = 0;
     uint32_t uid = static_cast<uint32_t>(getuid());
-    std::string str_length = std::to_string(length);
     IPC::message response {};
     IPC::message to_send { .type = IPC::message_type::RECEIVE,
         .uid = uid,
-        .data = std::vector<uint8_t>(str_length.cbegin(), str_length.cend()) };
+        .data = std::vector<uint8_t>(sizeof(length)) };
+
+    std::copy(reinterpret_cast<uint8_t*>(&length),
+        reinterpret_cast<uint8_t*>(&length) + sizeof(length),
+        to_send.data.begin());
 
     status = ipc->send_message(to_send);
     if (0 != status) {
@@ -56,6 +60,10 @@ int32_t str_client::recv(std::size_t length, std::string& recevied_data)
     if (0 != status) {
         error_print("receiving message failed\n");
         return status;
+    }
+    if (IPC::message_type::RESPONSE != response.type) {
+        error_print("wrong response type: %d\n", response.type);
+        return EINVAL;
     }
 
     recevied_data = std::string(response.data.cbegin(), response.data.cend());
