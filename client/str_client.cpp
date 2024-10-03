@@ -62,7 +62,8 @@ int32_t str_client::recv(std::size_t length, std::string& recevied_data)
         return status;
     }
     if (IPC::message_type::RESPONSE != response.type) {
-        error_print("wrong response type: %d\n", response.type);
+        error_print(
+            "wrong response type: %hu\n", static_cast<uint16_t>(response.type));
         return EINVAL;
     }
 
