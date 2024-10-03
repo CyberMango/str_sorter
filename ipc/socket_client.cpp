@@ -24,27 +24,28 @@ int32_t IPC::socket_client::connect_to_server(std::string address)
     errno = 0;
     int client_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (client_socket < 0) {
-        error_print("could not create client socket\n");
-        return static_cast<int32_t>(errno);
+        status = static_cast<int32_t>(errno);
+        error_print("could not create client socket. errno=%d\n", status);
+        return status;
     }
     m_socket = std::make_unique<socket_guard>(client_socket);
 
-    // Define the server address.
+    // Connect to the server.
     status = IPC::get_socket_address(address, &server_addr);
     if (0 != status) {
         return status;
     }
 
-    // inet_pton(AF_INET, ip.c_str(), &server_addr.sin_addr); // TODO is this
-    // needed???
-
-    // Connect to the server.
     errno = 0;
     status = connect(
         m_socket->m_fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
     if (0 > status) {
-        error_print("connection to server %s:%d failed\n", ip.c_str(), port);
-        return EIO;
+        status = static_cast<int32_t>(errno);
+        error_print("connection to server %s:%d failed. errno=%d\n",
+            ip.c_str(),
+            port,
+            status);
+        return status;
     }
 
     return 0;
@@ -59,6 +60,7 @@ int32_t IPC::socket_client::disconnect()
 int32_t IPC::socket_client::send_message(IPC::message const& message)
 {
     int unix_status = 0;
+    int32_t status = 0;
     auto& msg_data = message.data;
     char data_buf[2048] = { 0 };
     std::size_t data_len = 0;
@@ -80,8 +82,9 @@ int32_t IPC::socket_client::send_message(IPC::message const& message)
         errno = 0;
         unix_status = send(m_socket->m_fd, data_buf, data_len, 0);
         if (unix_status < 0) {
-            error_print("send failed with %d\n", errno);
-            return static_cast<int32_t>(errno);
+            status = static_cast<int32_t>(errno);
+            error_print("send failed. errno=%d\n", errno);
+            return status;
         }
         data_sent += data_len;
         data_len = 0;
@@ -93,6 +96,7 @@ int32_t IPC::socket_client::send_message(IPC::message const& message)
 int32_t IPC::socket_client::recv_message(IPC::message& message)
 {
     int unix_status = 0;
+    int32_t status = 0;
     auto& msg_data = message.data;
     char data_buf[2048] = { 0 };
     std::size_t data_read = 0;
@@ -102,8 +106,9 @@ int32_t IPC::socket_client::recv_message(IPC::message& message)
     errno = 0;
     bytes_received = recv(m_socket->m_fd, data_buf, sizeof(data_buf), 0);
     if (bytes_received < 0) {
-        error_print("recv failed with %d\n", errno);
-        return static_cast<int32_t>(errno);
+        status = static_cast<int32_t>(errno);
+        error_print("recv failed.  errno=%d\n", errno);
+        return status;
     }
     memmove(&msg_metadata, data_buf, sizeof(msg_metadata));
     msg_data.insert(msg_data.begin(),
@@ -118,8 +123,9 @@ int32_t IPC::socket_client::recv_message(IPC::message& message)
             std::min(sizeof(data_buf), msg_metadata.data_len - data_read),
             0);
         if (bytes_received < 0) {
-            error_print("recv failed with %d\n", errno);
-            return static_cast<int32_t>(errno);
+            status = static_cast<int32_t>(errno);
+            error_print("recv failed. errno=%d\n", errno);
+            return status;
         }
 
         msg_data.insert(msg_data.end(), data_buf, data_buf + bytes_received);

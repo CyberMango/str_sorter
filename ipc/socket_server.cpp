@@ -29,9 +29,9 @@ int32_t IPC::socket_server::start_server(std::string address)
     errno = 0;
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (0 == server_fd) {
-        // TODO need to save errno before printing. here and everywhere.
-        error_print("Socket creation failed\n");
-        return static_cast<int32_t>(errno);
+        status = static_cast<int32_t>(errno);
+        error_print("Socket creation failed. errno=%d\n", status);
+        return status;
     }
     m_socket = std::make_unique<socket_guard>(server_fd);
 
@@ -41,22 +41,24 @@ int32_t IPC::socket_server::start_server(std::string address)
     if (0 != status) {
         return status;
     }
+
     errno = 0;
     unix_status = bind(m_socket->m_fd,
         reinterpret_cast<sockaddr*>(m_socket_address.get()),
         sizeof(*m_socket_address));
     if (0 > unix_status) {
-        // TODO need to save errno before printing. here and everywhere.
-        error_print("Binding on address failed\n");
-        return static_cast<int32_t>(errno);
+        status = static_cast<int32_t>(errno);
+        error_print("Binding on address failed. errno=%d\n", errno);
+        return status;
     }
 
     // Listen for incoming connections.
     errno = 0;
     unix_status = listen(m_socket->m_fd, MAX_CONNECTIONS);
     if (0 > unix_status) {
-        error_print("server listening failed\n");
-        return static_cast<int32_t>(errno);
+        status = static_cast<int32_t>(errno);
+        error_print("server listening failed. errno=%d\n", errno);
+        return status;
     }
 
     debug_print("Server is listening on port %d for max %d connections\n",

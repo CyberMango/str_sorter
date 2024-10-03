@@ -15,7 +15,6 @@ int32_t IPC::analyze_address(std::string address, std::string& ip, int& port)
     }
 
     ip = address.substr(0, separator_index);
-    // TODO is this correct to use nullptr here?
     port = strtol(address.substr(separator_index + 1).c_str(), &endptr, 10);
     if ('\0' != *endptr) {
         error_print(
@@ -30,6 +29,7 @@ int32_t IPC::get_socket_address(
     std::string address, sockaddr_in* socket_address)
 {
     int32_t status = 0;
+    int unix_status = 0;
     std::string ip_address {};
     int port = 0;
 
@@ -38,8 +38,21 @@ int32_t IPC::get_socket_address(
         return status;
     }
     socket_address->sin_family = AF_INET;
-    socket_address->sin_addr.s_addr = inet_addr(ip_address.c_str());
     socket_address->sin_port = htons(port);
+
+    // Convert the ASCII address to binary address.
+    errno = 0;
+    unix_status
+        = inet_pton(AF_INET, ip_address.c_str(), &(socket_address->sin_addr));
+    status = static_cast<int32_t>(errno);
+    if (0 == unix_status) {
+        error_print("invalid network address: %s\n", ip_address.c_str());
+        return EINVAL;
+    }
+    if (unix_status < 0) {
+        error_print("inet_pton failed. errno=%d\n", status);
+        return status;
+    }
 
     return 0;
 }

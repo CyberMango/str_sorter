@@ -30,7 +30,7 @@ public:
 
     ~socket_client()
     {
-        // TODO disconnect i guess?
+        this->disconnect();
     }
 
     virtual int32_t connect_to_server(std::string address) override;
