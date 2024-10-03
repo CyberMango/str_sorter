@@ -3,33 +3,32 @@
 
 #include <cstdint>
 #include <memory>
+#include <string>
+#include <thread>
+#include <vector>
 
 #include "../ipc/server.hpp"
-#include "../ipc/socket_server.hpp"
 #include "../utility/simple_logger.hpp"
 #include "data_handler.hpp"
 #include "requests_handler.hpp"
 
 class sort_server {
 public:
-    sort_server() = default;
+    sort_server(std::string address);
+    sort_server::~sort_server();
 
-    int32_t run()
-    {
-        int32_t status = 0;
-        std::unique_ptr<IPC_server_socket> server
-            = std::make_unique<IPC_server_socket>();
-
-        status = m_requests.initialize(std::move(server));
-        if (0 != status) {
-            error_print("Requests_handler initialization failed\n");
-            return status;
-        }
-        return m_requests.run();
-    }
+    int32_t run();
 
 private:
-    requests_handler m_requests;
+    void client_routine(std::unique_ptr<IPC::client> connection);
+    int32_t handle_message(
+        IPC::message& in_msg, std::unique_ptr<IPC::client>& connection);
+    int32_t handle_receive_message(
+        IPC::message& in_msg, std::unique_ptr<IPC::client>& connection);
+
+    std::unique_ptr<connections_handler> m_connections;
+    std::unique_ptr<data_handler> m_data;
+    std::vector<std::thread> m_routines;
 };
 
 #endif // _SORT_SERVER_HPP_
