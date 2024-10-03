@@ -2,6 +2,9 @@
 #define _IPC_SOCKET_COMMON_HPP_
 
 /*** Includes ***/
+#include <cstdint>
+#include <netinet/in.h>
+#include <string>
 #include <unistd.h>
 
 #include "../utility/simple_logger.hpp"
@@ -9,7 +12,7 @@
 namespace IPC {
 
 /*** Constants ***/
-#define ADDRESS_SEPARATOR (':')
+#define ADDRESS_STR_SEPARATOR (':')
 
 /*** Definitions ***/
 
@@ -27,6 +30,12 @@ public:
 
     int m_fd;
 };
+
+/*** Functions ***/
+
+int32_t analyze_address(std::string address, std::string& ip, int& port);
+
+int32_t get_socket_address(std::string address, sockaddr_in* socket_address);
 
 } // namespace IPC
 

@@ -15,37 +15,46 @@
 #include "../utility/simple_logger.hpp"
 #include "server.hpp"
 #include "socket_client.hpp"
+#include "socket_common.hpp"
 
 /*** Functions ***/
 
-int32_t IPC::socket_server::start_server()
+int32_t IPC::socket_server::start_server(std::string address)
 {
-    int status = 0;
+    int unix_status = 0;
+    int32_t status = 0;
     int server_fd = 0;
-    struct sockaddr_in address = { 0 };
 
     // Create a TCP socket.
     errno = 0;
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (0 == server_fd) {
+        // TODO need to save errno before printing. here and everywhere.
         error_print("Socket creation failed\n");
         return static_cast<int32_t>(errno);
     }
     m_socket = std::make_unique<socket_guard>(server_fd);
 
-    // Bind the server on localhost for now.
-    get_address(address);
+    // Bind the server to the given address.
+    m_socket_address = std::make_unique<struct sockaddr_in>();
+    status = IPC::get_socket_address(address, m_socket_address.get());
+    if (0 != status) {
+        return status;
+    }
     errno = 0;
-    status = bind(m_socket->m_fd, (sockaddr*)(&address), sizeof(address));
-    if (0 > status) {
+    unix_status = bind(m_socket->m_fd,
+        reinterpret_cast<sockaddr*>(m_socket_address.get()),
+        sizeof(*m_socket_address));
+    if (0 > unix_status) {
+        // TODO need to save errno before printing. here and everywhere.
         error_print("Binding on address failed\n");
         return static_cast<int32_t>(errno);
     }
 
     // Listen for incoming connections.
     errno = 0;
-    status = listen(m_socket->m_fd, MAX_CONNECTIONS);
-    if (0 > status) {
+    unix_status = listen(m_socket->m_fd, MAX_CONNECTIONS);
+    if (0 > unix_status) {
         error_print("server listening failed\n");
         return static_cast<int32_t>(errno);
     }
@@ -61,13 +70,12 @@ int32_t IPC::socket_server::wait_for_connection(
     std::unique_ptr<IPC::client>& connection)
 {
     int connection_fd = 0;
-    struct sockaddr_in address = { 0 };
-    int addrlen = sizeof(address);
+    int addrlen = sizeof(*m_socket_address);
 
-    get_address(address);
     debug_print("waiting for a connection\n");
-    connection_fd = accept(
-        m_socket->m_fd, (struct sockaddr*)&address, (socklen_t*)(&addrlen));
+    connection_fd = accept(m_socket->m_fd,
+        reinterpret_cast<struct sockaddr*>(m_socket_address.get()),
+        (socklen_t*)(&addrlen));
     if (connection_fd < 0) {
         error_print("accept failed\n");
         return EIO;
@@ -76,104 +84,4 @@ int32_t IPC::socket_server::wait_for_connection(
     debug_print("connection accepted on socket %d\n", connection_fd);
 
     return 0;
-
-    // Wait for a new request's metadata.
-    // TODO assuming well formed messages with no \0 or errors to save dev
-    // time.
-    // ssize_t bytes_received
-    //     = recv(connection->m_fd, recv_buf, sizeof(request_metadata), 0);
-    // if (-1 == bytes_received) {
-    //     error_print("error receiving message metadata");
-    //     return EIO;
-    // }
-    // std::memmove(&metadata, recv_buf, sizeof(metadata));
-
-    // // Receive the data of the request.
-    // request.data = std::string {};
-    // while (request.data.length() < metadata.data_length) {
-    //     bytes_received = recv(connection->m_fd, recv_buf, 2048 - 1, 0);
-    //     if (-1 == bytes_received) {
-    //         error_print("error receiving message data");
-    //         return EIO;
-    //     }
-    //     recv_buf[bytes_received] = '\0';
-    //     request.data += recv_buf;
-    // }
-
-    // request.id = static_cast<uint32_t>(connection_fd);
-    // request.uid = metadata.uid;
-    // request.type = metadata.type;
-
-    // // Save received connections so that we can answer them.
-    // if (IPC::server::request_type::RECEIVE == request.type) {
-    //     add_connection(connection, request.id);
-    // }
-
-    // return 0;
 }
-
-void IPC::socket_server::get_address(struct sockaddr_in& address)
-{
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = inet_addr(SERVER_IP);
-    address.sin_port = htons(SERVER_PORT);
-}
-
-// void IPC::socket_server::add_connection(
-//     std::unique_ptr<IPC::socket_server::IPC_socket>& new_connection,
-//     uint32_t id)
-// {
-//     std::lock_guard<std::mutex> lock(connections_mtx);
-
-//     connections[id] = std::move(new_connection);
-// }
-
-// std::unique_ptr<IPC::socket_server::IPC_socket>
-// IPC::socket_server::pop_connection(uint32_t id)
-// {
-//     std::lock_guard<std::mutex> lock(connections_mtx);
-
-//     auto iter = connections.find(id);
-//     // connection not found.
-//     if (connections.end() == iter) {
-//         return nullptr;
-//     }
-//     auto connection = std::move(iter->second);
-//     connections.erase(iter);
-
-//     // TODO verify no need move
-//     return connection;
-// }
-
-// int32_t IPC::socket_server::send_response(IPC::server::response const&
-// to_send)
-// {
-//     request_metadata metadata = { 0 };
-//     // TODO again, just quick way to send messages. make it better.
-//     char data_buf[2048];
-//     std::unique_ptr<IPC_socket> socket_client = nullptr;
-
-//     socket_client = std::move(pop_connection(to_send.id));
-//     if (nullptr == socket_client) {
-//         error_print("no such connection to respond %d\n", to_send.id);
-//         return EINVAL;
-//     }
-
-//     // TODO the uid is a filler coz i didnt want to make a response metadata
-//     // struct.
-//     metadata.uid = 0;
-//     metadata.type = to_send.type;
-//     metadata.data_length = to_send.data.length();
-
-//     memmove(data_buf, &metadata, sizeof(metadata));
-//     memmove(data_buf + sizeof(metadata),
-//         to_send.data.c_str(),
-//         metadata.data_length);
-
-//     send(socket_client->m_fd,
-//         data_buf,
-//         sizeof(metadata) + metadata.data_length,
-//         0);
-
-//     return 0;
-// }

@@ -40,8 +40,6 @@ public:
 
 private:
     std::unique_ptr<socket_guard> m_socket;
-
-    int32_t analyze_address(std::string address, std::string& ip, int& port);
 };
 
 } // namespace IPC

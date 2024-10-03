@@ -21,7 +21,7 @@ public:
     virtual ~server()
     {
     }
-    virtual int32_t start_server() = 0;
+    virtual int32_t start_server(std::string address) = 0;
     virtual int32_t wait_for_connection(
         std::unique_ptr<IPC::client>& connection)
         = 0;

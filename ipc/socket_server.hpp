@@ -22,24 +22,25 @@ namespace IPC {
 class socket_server : public IPC::server {
 public:
     socket_server():
-        m_socket { nullptr }
+        m_socket { nullptr },
+        m_socket_address { nullptr }
     {
     }
     ~socket_server() override
     {
         // TODO close all sockets.
     }
-    virtual int32_t start_server() override;
+    virtual int32_t start_server(std::string address) override;
     virtual int32_t wait_for_connection(
         std::unique_ptr<IPC::client>& connection) override;
 
 private:
-    std::unique_ptr<IPC::socket_guard> m_socket;
-
-    void get_address(struct sockaddr_in& address);
     void add_connection(
         std::unique_ptr<IPC::socket_guard>& new_connection, uint32_t id);
     std::unique_ptr<IPC::socket_guard> pop_connection(uint32_t id);
+
+    std::unique_ptr<IPC::socket_guard> m_socket;
+    std::unique_ptr<struct sockaddr_in> m_socket_address;
 };
 
 } // namepsace IPC

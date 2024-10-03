@@ -19,7 +19,7 @@ void server_routine()
         .uid = 0,
         .data = vector<uint8_t>({ 75, 73, 78, 71 }) };
 
-    server->start_server();
+    server->start_server("127.0.0.1:1234");
 
     server->wait_for_connection(client);
 

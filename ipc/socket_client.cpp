@@ -18,7 +18,7 @@ int32_t IPC::socket_client::connect_to_server(std::string address)
     int32_t status = 0;
     std::string ip {};
     int port = 0;
-    struct sockaddr_in server_adr = { 0 };
+    struct sockaddr_in server_addr = { 0 };
 
     // Create a client socket.
     errno = 0;
@@ -30,20 +30,18 @@ int32_t IPC::socket_client::connect_to_server(std::string address)
     m_socket = std::make_unique<socket_guard>(client_socket);
 
     // Define the server address.
-    status = analyze_address(address, ip, port);
+    status = IPC::get_socket_address(address, &server_addr);
     if (0 != status) {
         return status;
     }
-    server_adr.sin_addr.s_addr = inet_addr(ip.c_str());
-    server_adr.sin_family = AF_INET;
-    server_adr.sin_port = htons(port);
 
-    inet_pton(AF_INET, ip.c_str(), &server_adr.sin_addr); // TODO
+    // inet_pton(AF_INET, ip.c_str(), &server_addr.sin_addr); // TODO is this
+    // needed???
 
     // Connect to the server.
     errno = 0;
     status = connect(
-        m_socket->m_fd, (struct sockaddr*)&server_adr, sizeof(server_adr));
+        m_socket->m_fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
     if (0 > status) {
         error_print("connection to server %s:%d failed\n", ip.c_str(), port);
         return EIO;
@@ -130,28 +128,5 @@ int32_t IPC::socket_client::recv_message(IPC::message& message)
 
     message.type = msg_metadata.type;
     message.uid = msg_metadata.uid;
-    return 0;
-}
-
-int32_t IPC::socket_client::analyze_address(
-    std::string address, std::string& ip, int& port)
-{
-    char* endptr = nullptr;
-    std::size_t separator_index = address.find(ADDRESS_SEPARATOR);
-    if (std::string::npos == separator_index) {
-        error_print("couldnt find %c in address - format is wrong\n",
-            ADDRESS_SEPARATOR);
-        return EINVAL;
-    }
-
-    ip = address.substr(0, separator_index);
-    // TODO is this correct to use nullptr here?
-    port = strtol(address.substr(separator_index + 1).c_str(), &endptr, 10);
-    if ('\0' != *endptr) {
-        error_print(
-            "failed extracting port from address %s\n", address.c_str());
-        return EINVAL;
-    }
-
     return 0;
 }
