@@ -11,6 +11,9 @@ endif()
 add_executable(str_sorter main.cpp)
 target_link_libraries(str_sorter ipc server client)
 
+add_executable(project_test test.cpp)
+target_link_libraries(project_test ipc server client)
+
 file(GLOB ipc_sources ipc/socket/*.cpp)
 file(GLOB ipc_headers ipc/*.hpp ipc/socket/*.hpp)
 add_library(ipc STATIC ${ipc_sources} ${ipc_headers})
