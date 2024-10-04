@@ -16,8 +16,9 @@ file(GLOB ipc_headers ipc/*.hpp ipc/socket/*.hpp)
 add_library(ipc STATIC ${ipc_sources} ${ipc_headers})
 target_include_directories(ipc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ipc)
 
-add_executable(ipc_test ipc/socket/test/test.cpp)
-target_link_libraries(ipc_test ipc)
+add_executable(ipc_socket_test ipc/socket/test/test.cpp)
+target_link_libraries(ipc_socket_test ipc)
+# set_target_properties(ipc_socket_test PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests")
 
 file(GLOB db_sources server/db/*.cpp)
 file(GLOB db_headers server/db/*.hpp)

@@ -5,15 +5,13 @@
 #include <unistd.h>
 
 #include "client/str_client.hpp"
-#include "ipc/socket/socket_client.hpp"
 #include "server/sort_server.hpp"
+#include "utility/macros.hpp"
 #include "utility/simple_logger.hpp"
 using namespace std;
 
 /*** Constants ***/
 #define ADDRESS "127.0.0.1:1238"
-
-#define UNUSED(_var) (void)(_var)
 
 /*** Functions ***/
 
@@ -26,8 +24,7 @@ void test_server()
 void test_client()
 {
     string data {};
-    auto ipc_client = std::make_unique<IPC::socket_client>();
-    str_client client { std::move(ipc_client) };
+    str_client client {};
 
     sleep(1);
 

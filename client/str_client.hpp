@@ -11,8 +11,8 @@
 
 class str_client {
 public:
-    str_client(std::unique_ptr<IPC::client> ipc):
-        m_ipc { std::move(ipc) }
+    str_client():
+        m_ipc { std::make_unique<IPC::socket_client>() }
     {
     }
     int32_t connect(std::string address);

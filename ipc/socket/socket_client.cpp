@@ -55,8 +55,12 @@ int32_t IPC::socket_client::connect_to_server(std::string address)
 
 int32_t IPC::socket_client::disconnect()
 {
-    debug_print("disconnecting socket %d\n", m_socket->m_fd);
-    return static_cast<int32_t>(close(m_socket->m_fd));
+    if (nullptr != m_socket) {
+        debug_print("disconnecting socket %d\n", m_socket->m_fd);
+        return static_cast<int32_t>(close(m_socket->m_fd));
+    }
+
+    return 0;
 }
 
 int32_t IPC::socket_client::send_message(IPC::message const& message)
