@@ -15,7 +15,7 @@
 class sort_server {
 public:
     sort_server(std::string address);
-    sort_server::~sort_server();
+    ~sort_server();
 
     int32_t run();
 

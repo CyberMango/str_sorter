@@ -52,7 +52,7 @@ int32_t data_handler::store_data(uint32_t uid, std::string const& data)
         return status;
     }
 
-    debug_print("stroing %s in data of user %u\n", data.c_str(), uid);
+    debug_print("storing \"%s\" in data of user %u\n", data.c_str(), uid);
     {
         std::shared_lock<std::shared_mutex> r_lock(m_clients_data_lock);
         m_clients_data[uid].store_data(data);
@@ -74,7 +74,8 @@ int32_t data_handler::fetch_data(
     debug_print("fetching %lu bytes for user %u\n", data_len, uid);
     {
         std::shared_lock<std::shared_mutex> r_lock(m_clients_data_lock);
-        data = m_clients_data[uid].fetch_data(data_len);
+        auto& client_data = m_clients_data[uid];
+        data = client_data.fetch_data(data_len);
     }
 
     return 0;

@@ -20,6 +20,7 @@ int32_t connections_handler::wait_for_connection(
         m_server_started = true;
     }
 
+    debug_print("server waiting for a connection\n");
     status = m_server->wait_for_connection(connection);
     if (0 != status) {
         return status;

@@ -42,14 +42,14 @@ int32_t sort_server::run()
             return status;
         }
 
+        debug_print("invoking a client routine\n");
         std::thread client_thread {
             &sort_server::client_routine, this, std::move(connection)
         };
-
         m_routines.push_back(std::move(client_thread));
 
         for (auto routine = m_routines.begin(); routine != m_routines.end();) {
-            if (routine->joinable()) {
+            if (routine->joinable()) { // TODO why is this always true?
                 routine->join();
                 routine = m_routines.erase(routine);
             } else {
@@ -72,6 +72,8 @@ void sort_server::client_routine(std::unique_ptr<IPC::client> connection)
             error_print("error receiving message: %d\n", status);
             continue;
         }
+        debug_print("received message of type %hu\n",
+            static_cast<uint16_t>(in_msg.type));
 
         status = handle_message(in_msg, connection);
         if (0 != status) {
@@ -106,7 +108,8 @@ int32_t sort_server::handle_message(
         }
         break;
     default:
-        error_print("unhandled message type: %d\n", in_msg.type);
+        error_print("unhandled message type: %hu\n",
+            static_cast<uint16_t>(in_msg.type));
         return EINVAL;
     }
 
@@ -119,7 +122,9 @@ int32_t sort_server::handle_receive_message(
     int32_t status = 0;
     std::string data {};
     std::size_t length = 0;
-    IPC::message out_msg { .type = IPC::message_type::RESPONSE, .uid = 0 };
+    IPC::message out_msg {
+        .type = IPC::message_type::RESPONSE, .uid = 0, .data {}
+    };
 
     std::copy(in_msg.data.cbegin(),
         in_msg.data.cend(),
