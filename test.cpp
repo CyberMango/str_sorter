@@ -65,7 +65,7 @@ bool test_single_client()
             return false;
         }
 
-        client.recv(20, data);
+        client.recv(25, data);
         if (strncmp("aabbbbbbbcccccccddee", data.c_str(), 21)) {
             return false;
         }

@@ -37,7 +37,6 @@ std::string data_handler::client_data::fetch_data(std::size_t length)
     std::lock_guard<std::mutex> lock(m_data_lock);
 
     auto out = m_data.substr(0, length);
-    // TODO check this works and does not throw error on short m_data.
     m_data = m_data.substr(std::min(length, m_data.size()));
 
     return out;
