@@ -12,8 +12,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "../utility/simple_logger.hpp"
-#include "server.hpp"
+#include "../../utility/simple_logger.hpp"
+#include "../server.hpp"
 #include "socket_client.hpp"
 #include "socket_common.hpp"
 

@@ -7,7 +7,7 @@
 
 #include "../ipc/client.hpp"
 #include "../ipc/server.hpp"
-#include "../ipc/socket_server.hpp"
+#include "../ipc/socket/socket_server.hpp"
 
 /*** Functions ***/
 

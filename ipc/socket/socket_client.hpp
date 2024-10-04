@@ -9,9 +9,8 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include "../utility/simple_logger.hpp"
-#include "client.hpp"
-#include "server.hpp"
+#include "../../utility/simple_logger.hpp"
+#include "../client.hpp"
 #include "socket_common.hpp"
 
 namespace IPC {

@@ -9,23 +9,26 @@ else()
 endif()
 
 add_executable(str_sorter main.cpp)
-target_link_libraries(str_sorter ipc)
-target_link_libraries(str_sorter server)
-target_link_libraries(str_sorter client)
+target_link_libraries(str_sorter ipc server client)
 
-file(GLOB ipc_sources ipc/*.cpp)
-file(GLOB ipc_headers ipc/*.hpp)
+file(GLOB ipc_sources ipc/socket/*.cpp)
+file(GLOB ipc_headers ipc/*.hpp ipc/socket/*.hpp)
 add_library(ipc STATIC ${ipc_sources} ${ipc_headers})
 target_include_directories(ipc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ipc)
 
-add_executable(ipc_test ipc/test/test.cpp)
+add_executable(ipc_test ipc/socket/test/test.cpp)
 target_link_libraries(ipc_test ipc)
+
+file(GLOB db_sources server/db/*.cpp)
+file(GLOB db_headers server/db/*.hpp)
+add_library(db STATIC ${db_sources} ${server_headers})
+target_include_directories(db PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/server/db)
 
 file(GLOB server_sources server/*.cpp)
 file(GLOB server_headers server/*.hpp)
 add_library(server STATIC ${server_sources} ${server_headers})
 target_include_directories(server PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/server)
-target_link_libraries(server ipc)
+target_link_libraries(server ipc db)
 
 add_library(client STATIC client/str_client.cpp client/str_client.hpp)
 target_include_directories(client PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/client)

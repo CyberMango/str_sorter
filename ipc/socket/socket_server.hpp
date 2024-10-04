@@ -13,8 +13,8 @@
 #include <utility>
 #include <vector>
 
-#include "../utility/simple_logger.hpp"
-#include "server.hpp"
+#include "../../utility/simple_logger.hpp"
+#include "../server.hpp"
 #include "socket_common.hpp"
 
 namespace IPC {

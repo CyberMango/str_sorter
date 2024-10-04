@@ -7,7 +7,7 @@
 #include <string>
 #include <unistd.h>
 
-#include "../utility/simple_logger.hpp"
+#include "../../utility/simple_logger.hpp"
 
 namespace IPC {
 

@@ -7,7 +7,7 @@
 #include <string>
 
 #include "../ipc/server.hpp"
-#include "../ipc/socket_client.hpp"
+#include "../ipc/socket/socket_client.hpp"
 
 class str_client {
 public:

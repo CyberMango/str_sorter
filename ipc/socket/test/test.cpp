@@ -3,10 +3,10 @@
 #include <memory>
 #include <thread>
 
+#include "../socket_client.hpp"
+#include "../socket_server.hpp"
 #include "client.hpp"
 #include "server.hpp"
-#include "socket_client.hpp"
-#include "socket_server.hpp"
 
 using namespace std;
 

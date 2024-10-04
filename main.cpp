@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include "client/str_client.hpp"
+#include "ipc/socket/socket_client.hpp"
 #include "server/sort_server.hpp"
 #include "utility/simple_logger.hpp"
 using namespace std;
@@ -34,32 +35,25 @@ void test_client()
 
     cout << "client sending1" << endl;
     client.send(string_view { "message1" });
-    sleep(1);
 
     cout << "client sending2" << endl;
     client.send("second msg");
-    sleep(1);
 
     cout << "client sending3" << endl;
     client.send("third");
-    sleep(1);
 
     cout << "client sending4" << endl;
     client.send("4th time");
-    sleep(1);
 
     cout << "client receiving" << endl;
     client.recv(5, data);
     cout << "received1: \"" << data << "\"" << endl;
-    sleep(1);
 
     client.recv(56, data);
     cout << "received2: \"" << data << "\"" << endl;
-    sleep(1);
 
     client.recv(4, data);
     cout << "received3: \"" << data << "\"" << endl;
-    sleep(1);
 }
 
 int main(int argc, char* argv[])
