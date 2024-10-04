@@ -39,9 +39,8 @@ public:
     virtual int32_t recv_message(IPC::message& message) override;
 
 private:
-    int32_t receive_first_data_chunk(
-        message_metadata& metadata, std::vector<uint8_t>& message_data);
-    int32_t receive_data_chunk(IPC::message& message);
+    int32_t receive_message_metadata(message_metadata& msg_metadata);
+    int32_t receive_data_chunk(IPC::message& message, std::size_t length);
 
     std::unique_ptr<socket_guard> m_socket;
 };

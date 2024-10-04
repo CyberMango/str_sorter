@@ -48,6 +48,7 @@ int32_t IPC::socket_client::connect_to_server(std::string address)
             status);
         return status;
     }
+    debug_print("connected to server on socket %d\n", m_socket->m_fd);
 
     return 0;
 }
@@ -64,36 +65,36 @@ int32_t IPC::socket_client::send_message(IPC::message const& message)
     int32_t status = 0;
     auto& msg_data = message.data;
     char data_buf[2048] = { 0 };
-    std::size_t data_len = 0;
     std::size_t data_sent = 0;
     IPC::message_metadata msg_metadata { .type = message.type,
         .uid = message.uid,
         .data_len = message.data.size() };
 
-    memmove(data_buf + data_len, &msg_metadata, sizeof(msg_metadata));
-    data_len += sizeof(msg_metadata);
-
-    auto data_iter = msg_data.cbegin();
+    errno = 0;
+    unix_status = send(m_socket->m_fd, &msg_metadata, sizeof(msg_metadata), 0);
+    if (unix_status < 0) {
+        status = static_cast<int32_t>(errno);
+        error_print("send failed. errno=%d\n", errno);
+        return status;
+    }
 
     // Send data of any length.
+    auto data_iter = msg_data.cbegin();
     while (data_sent < msg_data.size()) {
-        // TODO move the whole data reading to inner function.
         std::size_t bytes_to_move
-            = std::min(2048 - data_len, msg_data.size() - data_sent);
+            = std::min((std::size_t)2048, msg_data.size() - data_sent);
 
-        memmove(data_buf + data_len, data_iter.base(), bytes_to_move);
-        data_len += bytes_to_move;
+        memmove(data_buf, data_iter.base(), bytes_to_move);
         data_iter += bytes_to_move;
 
         errno = 0;
-        unix_status = send(m_socket->m_fd, data_buf, data_len, 0);
+        unix_status = send(m_socket->m_fd, data_buf, bytes_to_move, 0);
         if (unix_status < 0) {
             status = static_cast<int32_t>(errno);
             error_print("send failed. errno=%d\n", errno);
             return status;
         }
-        data_sent += data_len;
-        data_len = 0;
+        data_sent += bytes_to_move;
     }
 
     return 0;
@@ -105,9 +106,10 @@ int32_t IPC::socket_client::recv_message(IPC::message& message)
     IPC::message_metadata msg_metadata {
         .type = IPC::message_type::INVALID, .uid = 0, .data_len = 0
     };
+    message.data = std::vector<uint8_t>();
 
-    // First chunk contains both metadata and message data.
-    status = receive_first_data_chunk(msg_metadata, message.data);
+    // Need to get the metadata to know how many data bytes to read.
+    status = receive_message_metadata(msg_metadata);
     if (0 != status) {
         return status;
     }
@@ -121,7 +123,8 @@ int32_t IPC::socket_client::recv_message(IPC::message& message)
 
     // Read all the data that was supposed to be sent.
     while (message.data.size() < msg_metadata.data_len) {
-        status = receive_data_chunk(message);
+        status = receive_data_chunk(
+            message, msg_metadata.data_len - message.data.size());
         if (0 != status) {
             return status;
         }
@@ -130,15 +133,16 @@ int32_t IPC::socket_client::recv_message(IPC::message& message)
     return 0;
 }
 
-int32_t IPC::socket_client::receive_first_data_chunk(
-    IPC::message_metadata& msg_metadata, std::vector<uint8_t>& msg_data)
+int32_t IPC::socket_client::receive_message_metadata(
+    IPC::message_metadata& msg_metadata)
 {
     int32_t status = 0;
-    std::array<uint8_t, 1024> data_buf = { 0 };
     ssize_t bytes_received = 0;
 
+    debug_print("waiting for data in socket %d\n", m_socket->m_fd);
     errno = 0;
-    bytes_received = recv(m_socket->m_fd, data_buf.data(), data_buf.size(), 0);
+    bytes_received
+        = recv(m_socket->m_fd, &msg_metadata, sizeof(msg_metadata), 0);
     if (bytes_received < 0) {
         status = static_cast<int32_t>(errno);
         error_print("recv failed. errno=%d\n", status);
@@ -149,29 +153,25 @@ int32_t IPC::socket_client::receive_first_data_chunk(
         return 0;
     }
     if (bytes_received < static_cast<ssize_t>(sizeof(msg_metadata))) {
-        error_print("received less bytes than possible. Got %ld, expected at "
-                    "least %lu\n",
+        error_print("received less bytes than needed. Got %ld, expected %lu\n",
             bytes_received,
             sizeof(msg_metadata));
         return EIO;
     }
 
-    memmove(&msg_metadata, data_buf.data(), sizeof(msg_metadata));
-    msg_data.insert(msg_data.begin(),
-        data_buf.begin() + sizeof(msg_metadata),
-        data_buf.begin() + bytes_received);
-
     return 0;
 }
 
-int32_t IPC::socket_client::receive_data_chunk(IPC::message& message)
+int32_t IPC::socket_client::receive_data_chunk(
+    IPC::message& message, std::size_t length)
 {
     int32_t status = 0;
     std::array<uint8_t, 1024> data_buf = { 0 };
     ssize_t bytes_received = 0;
 
     errno = 0;
-    bytes_received = recv(m_socket->m_fd, data_buf.data(), data_buf.size(), 0);
+    bytes_received = recv(
+        m_socket->m_fd, data_buf.data(), std::min(data_buf.size(), length), 0);
     if (bytes_received < 0) {
         status = static_cast<int32_t>(errno);
         error_print("recv failed. errno=%d\n", status);
