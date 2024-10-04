@@ -1,6 +1,7 @@
 #include "str_client.hpp"
 
 #include <array>
+#include <memory>
 #include <string>
 #include <unistd.h>
 
@@ -8,7 +9,7 @@
 
 int32_t str_client::connect(std::string address)
 {
-    int32_t status = ipc->connect_to_server(address);
+    int32_t status = m_ipc->connect_to_server(address);
     if (0 != status) {
         error_print("connecting to server failed with %d\n", status);
         return status;
@@ -18,7 +19,7 @@ int32_t str_client::connect(std::string address)
 
 int32_t str_client::disconnect()
 {
-    return ipc->disconnect();
+    return m_ipc->disconnect();
 }
 
 int32_t str_client::send(std::string_view const& data)
@@ -28,7 +29,7 @@ int32_t str_client::send(std::string_view const& data)
         .uid = uid,
         .data = std::vector<uint8_t>(data.cbegin(), data.cend()) };
 
-    int32_t status = ipc->send_message(to_send);
+    int32_t status = m_ipc->send_message(to_send);
     if (0 != status) {
         error_print("sending a message failed\n");
         return status;
@@ -50,13 +51,15 @@ int32_t str_client::recv(std::size_t length, std::string& recevied_data)
         reinterpret_cast<uint8_t*>(&length) + sizeof(length),
         to_send.data.begin());
 
-    status = ipc->send_message(to_send);
+    debug_print("sending receive message\n");
+    status = m_ipc->send_message(to_send);
     if (0 != status) {
         error_print("sending message failed\n");
         return status;
     }
 
-    status = ipc->recv_message(response);
+    debug_print("waiting for receive message response\n");
+    status = m_ipc->recv_message(response);
     if (0 != status) {
         error_print("receiving message failed\n");
         return status;
