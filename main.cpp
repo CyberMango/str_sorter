@@ -4,7 +4,7 @@
 
 #include "client/simple_client.hpp"
 #include "ipc/socket_server.hpp"
-// #include "server/requests_handler.hpp"
+// #include "server/connections_handler.hpp"
 #include "server/sort_server.hpp"
 #include "utility/simple_logger.hpp"
 using namespace std;
@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 
 // int main(int argc, char* argv[])
 // {
-//     requests_handler server {};
+//     connections_handler server {};
 //     str_client client {};
 
 //     server.initialize();

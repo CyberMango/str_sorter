@@ -9,8 +9,8 @@
 
 #include "../ipc/server.hpp"
 #include "../utility/simple_logger.hpp"
+#include "connections_handler.hpp"
 #include "data_handler.hpp"
-#include "requests_handler.hpp"
 
 class sort_server {
 public:
