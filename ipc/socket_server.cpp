@@ -61,7 +61,9 @@ int32_t IPC::socket_server::start_server(std::string address)
         return status;
     }
 
-    debug_print("Server is listening on port %d for max %d connections\n",
+    debug_print(
+        "Server is listening on socket %d, port %d for max %d connections\n",
+        m_socket->m_fd,
         SERVER_PORT,
         MAX_CONNECTIONS);
 

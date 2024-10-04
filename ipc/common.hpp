@@ -11,6 +11,7 @@ namespace IPC {
 
 enum class message_type : uint16_t {
     INVALID = 0,
+    DISCONNECT,
     SEND,
     RECEIVE,
     RESPONSE,
@@ -20,7 +21,7 @@ struct __attribute__((packed)) message_metadata {
 public:
     message_type type;
     uint32_t uid;
-    uint32_t data_len;
+    std::size_t data_len;
 };
 
 struct message {

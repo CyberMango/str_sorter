@@ -12,6 +12,7 @@ using namespace std;
 
 void server_routine()
 {
+    int32_t status = 0;
     unique_ptr<IPC::server> server = make_unique<IPC::socket_server>();
     unique_ptr<IPC::client> client = nullptr;
     IPC::message in_msg {};
@@ -19,7 +20,10 @@ void server_routine()
         .uid = 0,
         .data = vector<uint8_t>({ 75, 73, 78, 71 }) };
 
-    server->start_server("127.0.0.1:1234");
+    status = server->start_server("127.0.0.1:1234");
+    if (0 != status) {
+        return;
+    }
 
     server->wait_for_connection(client);
 
