@@ -99,7 +99,7 @@ bool test_multiple_clients_one_user()
 
     std::thread server_thread { [&server]() { server.run(); } };
 
-    auto client_routine = [address](str_client& client) {
+    auto client_routine = [address](str_client& client, int secs) {
         int32_t status = 0;
         std::string data {};
 
@@ -135,6 +135,8 @@ bool test_multiple_clients_one_user()
             return false;
         }
 
+        sleep(secs);
+
         status = client.recv(25, data);
         debug_print("@@@@ data got \"%s\"\n", data.c_str());
         if (0 != status) {
@@ -145,9 +147,9 @@ bool test_multiple_clients_one_user()
         return true;
     };
 
-    std::thread client1_thread { client_routine, std::ref(client1) };
-    std::thread client2_thread { client_routine, std::ref(client2) };
-    std::thread client3_thread { client_routine, std::ref(client3) };
+    std::thread client1_thread { client_routine, std::ref(client1), 5 };
+    std::thread client2_thread { client_routine, std::ref(client2), 1 };
+    std::thread client3_thread { client_routine, std::ref(client3), 3 };
 
     // TODO for now check manually that nothing failed. too lazy to use future.
 
