@@ -1,91 +1,77 @@
 /*** Includes ***/
+#include <ctime>
 #include <iostream>
+#include <thread>
 #include <unistd.h>
 
-#include "client/simple_client.hpp"
-#include "ipc/socket_server.hpp"
-// #include "server/connections_handler.hpp"
+#include "client/str_client.hpp"
 #include "server/sort_server.hpp"
 #include "utility/simple_logger.hpp"
 using namespace std;
 
+/*** Constants ***/
+#define ADDRESS "127.0.0.1:1238"
+
+#define UNUSED(_var) (void)(_var)
+
 /*** Functions ***/
-// IPC test
 
 void test_server()
 {
-    // IPC_server_socket server {};
-    // IPC::server::message msg = { 0 };
-    // IPC::server::response resp = { 0 };
-    // server.start_server();
-    // char* end = nullptr;
-
-    // while (true) {
-    //     auto req = server.wait_for_request(msg);
-    //     cout << "data received from client: " << msg.data << endl;
-    //     if (msg.type == IPC::server::request_type::RECEIVE) {
-    //         auto len = static_cast<uint32_t>(
-    //             std::strtoll(msg.data.c_str(), &end, 10));
-    //         resp.data = string(len, 'a');
-    //         resp.id = msg.id;
-    //         resp.type = IPC::server::request_type::RECEIVE;
-    //         server.send_response(resp);
-    //     }
-    // }
-
-    sort_server server {};
+    sort_server server { ADDRESS };
     server.run();
 }
 
 void test_client()
 {
     string data {};
-    str_client client {};
+    auto ipc_client = std::make_unique<IPC::socket_client>();
+    str_client client { std::move(ipc_client) };
+
+    sleep(1);
+
+    client.connect(ADDRESS);
+
     cout << "client sending1" << endl;
-    client.send(string_view { "aaaaabbbbb" });
+    client.send(string_view { "message1" });
+    sleep(1);
+
     cout << "client sending2" << endl;
-    client.send("hhhhhhhhhh");
+    client.send("second msg");
+    sleep(1);
+
+    cout << "client sending3" << endl;
+    client.send("third");
+    sleep(1);
+
+    cout << "client sending4" << endl;
+    client.send("4th time");
+    sleep(1);
 
     cout << "client receiving" << endl;
     client.recv(5, data);
-    cout << "received: " << data << endl;
+    cout << "received1: \"" << data << "\"" << endl;
+    sleep(1);
+
     client.recv(56, data);
-    cout << "received: " << data << endl;
+    cout << "received2: \"" << data << "\"" << endl;
+    sleep(1);
+
+    client.recv(4, data);
+    cout << "received3: \"" << data << "\"" << endl;
+    sleep(1);
 }
 
 int main(int argc, char* argv[])
 {
+    UNUSED(argc);
+    UNUSED(argv);
 
-    auto fd = fork();
-    if (0 == fd) {
-        test_client();
-    } else {
-        test_server();
-    }
+    std::thread server_thread(test_server);
+    std::thread client_thread(test_client);
+
+    server_thread.join();
+    client_thread.join();
 
     return 0;
 }
-
-// int main(int argc, char* argv[])
-// {
-//     connections_handler server {};
-//     str_client client {};
-
-//     server.initialize();
-
-//     auto server_handler = fork();
-//     if (0 == server_handler) {
-//         server.run();
-//     }
-
-//     std::string data_to_send { "initial data" };
-//     std::string received_data {};
-//     client.send(data_to_send);
-//     data_to_send = "second_data";
-//     client.send(data_to_send);
-
-//     client.recv(5, received_data);
-//     std::cout << "client got " << received_data << "\n";
-//     client.recv(50, received_data);
-//     std::cout << "client got " << received_data << "\n";
-// }
