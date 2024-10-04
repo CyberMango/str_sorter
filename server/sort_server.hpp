@@ -2,6 +2,7 @@
 #define _SORT_SERVER_HPP_
 
 #include <cstdint>
+#include <future>
 #include <memory>
 #include <string>
 #include <thread>
@@ -28,7 +29,7 @@ private:
 
     std::unique_ptr<connections_handler> m_connections;
     std::unique_ptr<data_handler> m_data;
-    std::vector<std::thread> m_routines;
+    std::vector<std::future<void>> m_routines;
 };
 
 #endif // _SORT_SERVER_HPP_

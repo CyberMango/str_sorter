@@ -1,6 +1,8 @@
 #include "sort_server.hpp"
 
+#include <chrono>
 #include <cstring>
+#include <future>
 #include <memory>
 #include <string>
 #include <thread>
@@ -25,7 +27,7 @@ sort_server::sort_server(std::string address):
 sort_server::~sort_server()
 {
     for (auto& routine : m_routines) {
-        routine.join();
+        (void)routine.get();
     }
 }
 
@@ -43,14 +45,18 @@ int32_t sort_server::run()
         }
 
         debug_print("invoking a client routine\n");
-        std::thread client_thread {
-            &sort_server::client_routine, this, std::move(connection)
-        };
+        // Using future to be able to attempt join without blocking.
+        std::future<void> client_thread = std::async(std::launch::async,
+            &sort_server::client_routine,
+            this,
+            std::move(connection));
         m_routines.push_back(std::move(client_thread));
 
         for (auto routine = m_routines.begin(); routine != m_routines.end();) {
-            if (routine->joinable()) { // TODO why is this always true?
-                routine->join();
+            if (std::future_status::ready
+                == routine->wait_for(std::chrono::seconds(0))) {
+                // Calling get is equivalent to join in regular threads.
+                (void)routine->get();
                 routine = m_routines.erase(routine);
             } else {
                 ++routine;
