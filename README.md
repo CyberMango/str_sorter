@@ -23,11 +23,11 @@ Implementation Directives:
 - The server must support multiple client connections concurrently.
 - The IPC portion of the task needs to be decoupled from the rest of the system. This means that if we choose to substitute the IPC method, the rest of the system will remain (relatively) untouched.
 - No libraries should be used to implement the solution [apart from the c++ standard one].
-System architecture (example: what subcomponents does the system have?)
-Components design (example: what entities are involved in making a specific components?)
-Correctness
-Robustness (example: solid and consistent error handling)
-Usability (example: clear error messages)
-What are the low-level Linux facilities that need to be employed here?
-What language features are most useful in achieving the goals mentioned?
-Efficiency and performance considerations are not important at this time
+- System architecture (example: what subcomponents does the system have?)
+- Components design (example: what entities are involved in making a specific components?)
+- Correctness
+- Robustness (example: solid and consistent error handling)
+- Usability (example: clear error messages)
+- What are the low-level Linux facilities that need to be employed here?
+- What language features are most useful in achieving the goals mentioned?
+*Efficiency and performance considerations are not important at this time
