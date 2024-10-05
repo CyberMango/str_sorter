@@ -30,4 +30,5 @@ Implementation Directives:
 - Usability (example: clear error messages)
 - What are the low-level Linux facilities that need to be employed here?
 - What language features are most useful in achieving the goals mentioned?
+
 *Efficiency and performance considerations are not important at this time
