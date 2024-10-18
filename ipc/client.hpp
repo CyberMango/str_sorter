@@ -11,6 +11,9 @@ namespace IPC {
 
 /*** Classes ***/
 
+/**
+ * A client object for inter-process-communication.
+ */
 class client {
 public:
     virtual ~client()

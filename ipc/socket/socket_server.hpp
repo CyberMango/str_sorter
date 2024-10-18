@@ -17,6 +17,9 @@
 #include "../server.hpp"
 #include "socket_common.hpp"
 
+/*** Constants ***/
+#define MAX_CONNECTIONS (10)
+
 namespace IPC {
 
 class socket_server : public IPC::server {
