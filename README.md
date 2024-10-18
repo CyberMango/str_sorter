@@ -10,12 +10,14 @@ beginning of the sorted data which have been received.
 5. The data in the server should be aggregated by Linux user id.
 All the API and the protocols can be chosen by you.
 Example for the client interaction:
+```
 send(“hello”, 5)
 recv(5) -> “ehllo”
 send(“hello”, 5)
 recv(2) -> eh
 send(“world”, 5)
 recv(8) -> “dllloorw”
+```
 
 Please give the following points some consideration during design and implementation:
 Implementation Directives:
