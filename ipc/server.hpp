@@ -10,18 +10,27 @@
 
 namespace IPC {
 
-/*** Constants ***/
-#define SERVER_IP "127.0.0.1"
-#define SERVER_PORT (1234)
-#define MAX_CONNECTIONS (10)
-
 /*** Definitions ***/
+
+/**
+ * A server object for inter-process-communication.
+ */
 class server {
 public:
     virtual ~server()
     {
     }
+    /**
+     * Set up the server to be able to listen for connections.
+     *
+     * address[in]: Address to attach to the server.
+     */
     virtual int32_t start_server(std::string address) = 0;
+    /**
+     * Wait for a single connection to the server.
+     *
+     * connection[out]: Client object for communication with the new connection.
+     */
     virtual int32_t wait_for_connection(
         std::unique_ptr<IPC::client>& connection)
         = 0;

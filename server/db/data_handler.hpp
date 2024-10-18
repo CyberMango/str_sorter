@@ -15,7 +15,13 @@ class data_handler {
 public:
     data_handler() = default;
 
+    /**
+     * Store new data for a specified UID.
+     */
     int32_t store_data(uint32_t uid, std::string const& data);
+    /**
+     * Fetch sorted data of a specified UID.
+     */
     int32_t fetch_data(uint32_t uid, std::size_t data_len, std::string& data);
 
 private:

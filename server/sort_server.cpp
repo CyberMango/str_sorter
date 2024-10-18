@@ -31,6 +31,9 @@ sort_server::~sort_server()
     }
 }
 
+/**
+ * Main loop of the server.
+ */
 int32_t sort_server::run()
 {
     int32_t status = 0;
@@ -52,6 +55,7 @@ int32_t sort_server::run()
             std::move(connection));
         m_routines.push_back(std::move(client_thread));
 
+        // Clean up any finished threads.
         for (auto routine = m_routines.begin(); routine != m_routines.end();) {
             if (std::future_status::ready
                 == routine->wait_for(std::chrono::seconds(0))) {
@@ -65,6 +69,9 @@ int32_t sort_server::run()
     }
 }
 
+/**
+ * The routine handling a single client.
+ */
 void sort_server::client_routine(std::unique_ptr<IPC::client> connection)
 {
     int32_t status = 0;
@@ -91,6 +98,9 @@ void sort_server::client_routine(std::unique_ptr<IPC::client> connection)
     debug_print("client disconnected from server\n");
 }
 
+/**
+ * Handle a single message.
+ */
 int32_t sort_server::handle_message(
     IPC::message& in_msg, std::unique_ptr<IPC::client>& connection)
 {
@@ -122,6 +132,9 @@ int32_t sort_server::handle_message(
     return 0;
 }
 
+/**
+ * Handle a message of type message_type::RECEIVE from the client.
+ */
 int32_t sort_server::handle_receive_message(
     IPC::message& in_msg, std::unique_ptr<IPC::client>& connection)
 {

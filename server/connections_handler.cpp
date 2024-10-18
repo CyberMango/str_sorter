@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <memory>
-#include <thread>
 
 #include "../ipc/server.hpp"
 #include "../utility/simple_logger.hpp"
